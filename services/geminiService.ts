@@ -1,7 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 
 // Initialize Gemini Client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// const ai = new GoogleGenAI({ apiKey: process.env.API_KEY }); // This line will be removed or commented out
 
 const SYSTEM_INSTRUCTION = `
 Eres el Planificador de Aventuras con IA para "Wave2Peak", una empresa de aventuras multi-ocio con sede en Granada, España.
@@ -34,8 +34,15 @@ CONTEXTO REAL DE SERVICIOS:
 
 export const planAdventure = async (userRequest: string): Promise<string> => {
   try {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+      console.warn("Gemini API Key is missing");
+      return "Lo siento, el sistema de IA no está configurado correctamente (falta API Key).";
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
     const model = "gemini-2.5-flash";
-    
+
     const response = await ai.models.generateContent({
       model: model,
       contents: userRequest,
@@ -49,6 +56,6 @@ export const planAdventure = async (userRequest: string): Promise<string> => {
     return response.text || "Lo siento, no pude generar un plan en este momento. Por favor inténtalo de nuevo.";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    throw new Error("Error al contactar con el planificador de aventuras.");
+    return "Lo siento, hubo un error al conectar con el asistente. Por favor inténtalo más tarde.";
   }
 };
